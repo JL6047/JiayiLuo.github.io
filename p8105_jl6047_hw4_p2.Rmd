@@ -1,0 +1,80 @@
+---
+
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+Since the original csv data is too large and I cannot commit it to github
+I filtered the data beforehands and saved it as a new csv file called "nyc_inspect_hw" before I commited the creteria is manhattan and score of greater than 10 and less than 50
+
+The following is my code:
+
+nyc_inspec = read_csv(file="./nyc_inspec.csv")%>%
+  filter(boro=="Manhattan")%>%
+  filter(score>10)%>%
+  filter(score<50)
+ 
+write.csv(nyc_inspec,"./nyc_inspec_hw.csv")
+
+
+Load the Data, filter the data with restaurants in Manhattan only.
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(plotly)
+nyc_inspec = read_csv(file="./nyc_inspec_hw.csv")
+
+```
+
+
+-----------------------------------------------------------------------
+
+
+### Chart A
+Create a scatter plot, of the geographical distribution of the restaurants in Manhattan,adjusting for x-axis as lattitude and y-axis longitude to fit the graph
+```{r,warning=FALSE}
+nyc_inspec %>%
+  plot_ly(
+    x = ~latitude, y = ~longitude, type = "scatter", mode = "markers",
+    color = ~score, text= ~cuisine_description, alpha = 100)%>%
+  layout(
+    xaxis = list(
+      range=c(40.7,40.85)
+        ),
+    yaxis = list(
+      range=c(-74.02,-73.92)
+    )
+  )
+
+```
+
+
+-----------------------------------------------------------------------
+
+### Chart B
+Create a box plot counting scores of each types of cuisines according to their score distribution.
+```{r,warning=FALSE}
+nyc_inspec %>% 
+  mutate(cuisine_description = fct_reorder(cuisine_description, score)) %>% 
+  plot_ly(y = ~score, color = ~cuisine_description, type = "box", colors = "viridis")%>%
+  layout(
+  
+    yaxis = list(
+      range=c(0,60)
+    )
+  )
+```
+
+-----------------------------------------------------------------------
+### Chart C
+Create a bar graph counting types of restaurants in Manhattan.
+```{r,warning=FALSE}
+nyc_inspec %>% 
+  count(cuisine_description) %>% 
+  mutate(Type = fct_reorder(cuisine_description, n)) %>% 
+  plot_ly(x = ~Type, y = ~n, color = ~Type, type = "bar", colors = "viridis")
+
+```
+
